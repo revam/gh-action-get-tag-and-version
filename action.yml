@@ -1,0 +1,58 @@
+name: 'Get tag and version'
+description: 'A simple action to get the last or next tag/version to use in other actions.'
+branding:
+  icon: 'tag'
+  color: 'gray-dark'
+inputs:
+  fallback:
+    description: Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it.
+    required: false
+    default: "0.0.0"
+  increment:
+    description: Increment the version number by one digit. Possible values are "major", "minor", "patch", "build" and "suffix".
+    required: false
+    default: "false"
+  tag:
+    description: Tag ref to use. Will omit the searching stage and use the supplied tag ref if its a valid match.
+    required: false
+    default: ""
+  branch:
+    description: Only search for for tags on the currently selected branch.
+    required: false
+    default: "false"
+  prefix:
+    description: The prefix to search for, and will be set for the new tags if auto-increment is enabled.
+    required: false
+    default: "v"
+  prefixRegex:
+    description: Optional. A regex sub-pattern to match multiple prefixes while looking for a match. Must also match the given prefix.
+    required: false
+    default: ""
+  suffix:
+    description: Optional. An optional suffix to search for, and will be set for new tags if auto-increment is enabled.
+    required: false
+    default: ""
+  suffixRegex:
+    description: Optional. A regex sub-pattern to match multiple suffixes while looking for a match. Must also match the given suffix.
+    required: false
+    default: ""
+outputs:
+  tag:
+    description: 'The full tag with the prefix, version and suffix combined.'
+  prefix:
+    description: 'The tag prefix.'
+  suffix:
+    description: 'The tag suffix.'
+  version:
+    description: 'The full version, with build number.'
+  version_major:
+    description: 'The major version number.'
+  version_minor:
+    description: 'The minor version number.'
+  version_patch:
+    description: 'The patch version number.'
+  version_build:
+    description: 'The build version number.'
+runs:
+  using: 'node16'
+  main: 'main.js'
