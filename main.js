@@ -65,7 +65,7 @@ if (SuffixRegex && !(new RegExp(`^${SuffixRegex}$`).test(Suffix))) {
 
 // Create the regex to use for matching.
 const tagRegex = Suffix || SuffixRegex ? (
-  new RegExp(`^(?<prefix>${PrefixRegex || Prefix})(?<version>(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?)(?:\\-(?<suffix>${SuffixRegex || Suffix}(?:\\.(?<suffixNumber>\\d+)))?)?$`)
+  new RegExp(`^(?<prefix>${PrefixRegex || Prefix})(?<version>(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?)(?:\\-(?<suffix>${SuffixRegex || Suffix}(?:\\.(?<suffixNumber>\\d+))?))?$`)
 ) : (
   new RegExp(`^(?<prefix>${PrefixRegex || Prefix})(?<version>(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?)$`)
 );
