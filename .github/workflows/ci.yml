@@ -17,7 +17,6 @@ jobs:
         id: release_info
         uses: revam/gh-action-get-tag-and-version@v1
         with:
-          branch: true
           prefix: v
           prefixRegex: "[vV]?"
           suffix: dev
