@@ -122,8 +122,8 @@ exec(gitCommand, (error, stdout, stderr) => {
       return extractVersionFromMatch(result);
   }
 
-  // Fallback to setting a zero version if no tags matched.
-  setZeroVersion();
+  console.log(FormatError, "Unable to find a matching tag. Exiting.");
+  process.exit(1);
 });
 
 /**
@@ -213,33 +213,6 @@ function extractVersionFromMatch(result) {
   fs.appendFileSync(outFile, `version_minor=${minor}\n`);
   fs.appendFileSync(outFile, `version_patch=${patch}\n`);
   fs.appendFileSync(outFile, `version_build=${build}\n`);
-
-  // Exit
-  process.exit(0);
-}
-
-/**
- * Set the output to the equivalent of a zero version.
- *
- * @returns {never} Will exit upon completion.
- */
-function setZeroVersion() {
-  // Log info to console.
-  console.log(FormatWarning, "Unable to find a matching tag, using zero version.");
-  console.log(FormatSuccess, `Found tag: ${Prefix}0.0.0${Suffix ? `-${Suffix}` : ""}`);
-  console.log(FormatSuccess, "Found version: 0.0.0.0");
-
-  // Add tag to output file
-  fs.appendFileSync(outFile, `tag=${Prefix}0.0.0${Suffix ? `-${Suffix}` : ""}\n`);
-  fs.appendFileSync(outFile, `tag_prefix=${Prefix}\n`);
-  fs.appendFileSync(outFile, `tag_suffix=${Suffix}${autoIncrement === "suffix" ? `.0` : ""}\n`);
-
-  // Add version to output file.
-  fs.appendFileSync(outFile, "version=0.0.0.0\n");
-  fs.appendFileSync(outFile, "version_major=0\n");
-  fs.appendFileSync(outFile, "version_minor=0\n");
-  fs.appendFileSync(outFile, "version_patch=0\n");
-  fs.appendFileSync(outFile, "version_build=0\n");
 
   // Exit
   process.exit(0);
