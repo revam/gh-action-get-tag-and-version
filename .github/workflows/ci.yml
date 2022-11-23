@@ -24,6 +24,10 @@ jobs:
           suffix: dev
           increment: suffix
 
+      - name: Test print tag and version
+        shell: sh
+        run: "echo tag: ${{ steps.release_info.outputs.tag }} version: ${{ steps.release_info.outputs.version }}"
+
       - name: Create Changelog
         run: |
           git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"* %B" > changelog.txt
