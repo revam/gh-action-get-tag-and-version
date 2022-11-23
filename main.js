@@ -73,7 +73,11 @@ const tagRegex = Suffix || SuffixRegex ? (
 // Command to run.
 const gitCommand = ref ? (
   // Get the tag and version info for the selected tag.
-  `git tag --sort=-creatordate --format="%(refname:short)" --list ${ref}`
+  ref.startsWith("refs") ? (
+    `git for-each-ref --sort=-creatordate --format="%(refname:short)" ${ref}`
+  ) : (
+    `git tag --sort=-creatordate --format="%(refname:short)" --list ${ref}`
+  )
 ) : perBranch ? (
   // Get the tags reachable from the current HEAD.
   'git tag --sort=-creatordate --format="%(refname:short)" --list'
