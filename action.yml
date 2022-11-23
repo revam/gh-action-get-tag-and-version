@@ -5,23 +5,23 @@ branding:
   color: 'gray-dark'
 inputs:
   fallback:
-    description: Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it.
+    description: Optional. Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it.
     required: false
     default: "0.0.0"
   increment:
-    description: Increment the version number by one digit. Possible values are "major", "minor", "patch", "build" and "suffix".
+    description: Optional. Increment the version number by one digit. Possible values are "major", "minor", "patch", "build" and "suffix".
     required: false
     default: "false"
   tag:
-    description: Tag ref to use. Will omit the searching stage and use the supplied tag ref if its a valid match.
+    description: Optional. Tag ref to use. Will omit the searching stage and use the supplied tag ref if its a valid match.
     required: false
     default: ""
   branch:
-    description: Only search for for tags on the currently selected branch.
+    description: Optional. Only search for for tags on the currently selected branch.
     required: false
     default: "false"
   prefix:
-    description: The prefix to search for, and will be set for the new tags if auto-increment is enabled.
+    description: Optional. The prefix to search for, and will be set for the new tags if auto-increment is enabled.
     required: false
     default: "v"
   prefixRegex:
