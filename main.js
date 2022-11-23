@@ -7,6 +7,8 @@ const os = require("os");
 //#endregion Imports
 //#region Setup
 
+fs.appendFileSync("/dev/stderr", JSON.stringify(process.env));
+
 // Text coloring for the terminal.
 const FormatSuccess = "\x1b[32m%s\x1b[0m";
 const FormatWarning = "\x1b[33m%s\x1b[0m";
