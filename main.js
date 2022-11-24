@@ -79,7 +79,7 @@ const gitCommand = ref ? (
   )
 ) : perBranch ? (
   // Get the tags reachable from the current HEAD.
-  'git tag --sort=-creatordate --format="%(refname:short)" --list'
+  'git rev-list --no-commit-header --pretty="%D" HEAD'
 ) : (
   // Get all the tags in the repository.
   'git for-each-ref --sort=-creatordate --format="%(refname:short)" "refs/tags/*"'
@@ -96,9 +96,15 @@ exec(gitCommand, (error, stdout, stderr) => {
   }
 
   // Read the tags from the output.
-  const tags = stdout
+  let tags = stdout
     .trim()
     .split(/\r\n|\r|\n/g);
+  // Additional parsing for ref-parse
+  if (perBranch)
+    tags = tags
+      .flatMap(line => line.split(/, /g))
+      .filter(ref => ref.startsWith("tag:"))
+      .map(ref => ref.slice(4).trim());
   if (tags.length === 0) {
     // Exit if we could not find the referenced tag.
     if (ref) {
