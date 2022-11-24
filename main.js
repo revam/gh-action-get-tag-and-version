@@ -2,7 +2,6 @@
 
 const { exec } = require("child_process");
 const fs = require("fs");
-const os = require("os");
 
 //#endregion Imports
 //#region Setup
@@ -99,7 +98,7 @@ exec(gitCommand, (error, stdout, stderr) => {
   // Read the tags from the output.
   const tags = stdout
     .trim()
-    .split(os.EOL);
+    .split(/\r\n|\r|\n/g);
   if (tags.length === 0) {
     // Exit if we could not find the referenced tag.
     if (ref) {
