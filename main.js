@@ -233,7 +233,7 @@ function extractVersionFromMatch(result, date, commit) {
 
   // Add commit hash to output file.
   fs.appendFileSync(outFile, `commit=${commit}\n`);
-  fs.appendFileSync(outFile, `commit_short=${commit.slice(0, 6)}\n`);
+  fs.appendFileSync(outFile, `commit_short=${commit.slice(0, 7)}\n`);
 
   // Add commit date to output file.
   fs.appendFileSync(outFile, `date=${date.toISOString()}\n`);
