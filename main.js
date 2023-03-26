@@ -98,7 +98,8 @@ exec(gitCommand, (error, stdout, stderr) => {
   // Read the tags from the output.
   let tags = stdout
     .trim()
-    .split(/\r\n|\r|\n/g);
+    .split(/\r\n|\r|\n/g)
+    .filter(tag => tag.trim());
   // Additional parsing for ref-parse
   if (perBranch)
     tags = tags
