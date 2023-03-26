@@ -36,13 +36,22 @@ inputs:
     description: Optional. A regex sub-pattern to match multiple suffixes while looking for a match. Must also match the given suffix.
     required: false
     default: ""
+  buildNumber:
+    description: 'Optional. A static build number.  Useful if the build number is provided by the environment. NOTE: Auto increment must be set to "build" or "suffix".'
+    required: false
+    default: ""
+
 outputs:
   tag:
     description: 'The full tag with the prefix, version and suffix combined.'
-  prefix:
+  tag_prefix:
     description: 'The tag prefix.'
-  suffix:
+  tag_suffix:
     description: 'The tag suffix.'
+  commit:
+    description: 'Full git commit hash for the tag.'
+  commit_short:
+    description: 'Short-form git commit hash for the tag.'
   version:
     description: 'The full version, with build number.'
   version_major:
@@ -53,6 +62,25 @@ outputs:
     description: 'The patch version number.'
   version_build:
     description: 'The build version number.'
+  date:
+    description: 'An ISO 8601 format timestamp in UTC offset.'
+  date_year:
+    description: 'The year component of the date in UTC offset.'
+  date_month:
+    description: 'The month component of the date in UTC offset.'
+  date_day:
+    description: 'The day component of the date in UTC offset.'
+  date_weekday:
+    description: 'The day of the week of the date in UTC offset (e.g. Monday, Tuesday, etc.)'
+  date_hours:
+    description: 'The hour component of the time in UTC offset.'
+  date_minutes:
+    description: 'The minute component of the time in UTC offset.'
+  date_seconds:
+    description: 'The second component of the time in UTC offset.'
+  date_milliseconds:
+    description: 'The millisecond component of the time in UTC offset.'
+
 runs:
   using: 'node16'
   main: 'main.js'

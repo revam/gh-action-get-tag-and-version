@@ -11,6 +11,8 @@ const FormatSuccess = "\x1b[32m%s\x1b[0m";
 const FormatWarning = "\x1b[33m%s\x1b[0m";
 const FormatError = "\x1b[31m%s\x1b[0m";
 
+const Weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
 // Inputs/outputs.
 let {
   // Fallback version. May include the prefix, but can also exclude it.
@@ -41,6 +43,9 @@ let {
 
 // Optional. Search for tags only on the selected branch.
 const perBranch = process.env.INPUT_BRANCH === "true";
+
+// Optional. Static build number supplied by the environment/user.
+const StaticBuildNumber = process.env.INPUT_BUILD_NUMBER && !Number.isNaN(parseInt(process.env.INPUT_BUILD_NUMBER, 10)) ? parseInt(process.env.INPUT_BUILD_NUMBER, 10) : null;
 
 // Optional. Auto-incement the version number (and reset the timestamp).
 let autoIncrement = process.env.INPUT_INCREMENT && process.env.INPUT_INCREMENT.toLowerCase() !== "false" ? process.env.INPUT_INCREMENT.toLowerCase() : false;
@@ -73,16 +78,16 @@ const tagRegex = Suffix || SuffixRegex ? (
 const gitCommand = ref ? (
   // Get the tag and version info for the selected tag.
   ref.startsWith("refs") ? (
-    `git for-each-ref --sort=-creatordate --format="%(refname:short)" ${ref}`
+    `git for-each-ref --sort=-authordate --format="%(refname:short)|||%(authordate)|||%(objectname)" ${ref}`
   ) : (
-    `git tag --sort=-creatordate --format="%(refname:short)" --list ${ref}`
+    `git tag --sort=-authordate --format="%(refname:short)|||%(authordate)|||%(objectname)" --list ${ref}`
   )
 ) : perBranch ? (
   // Get the tags reachable from the current HEAD.
-  'git rev-list --no-commit-header --pretty="%D" HEAD'
+  'git rev-list --no-commit-header --pretty="%D|||%aI|||%H" HEAD'
 ) : (
   // Get all the tags in the repository.
-  'git for-each-ref --sort=-creatordate --format="%(refname:short)" "refs/tags/*"'
+  'git for-each-ref --sort=-authordate --format="%(refname:short)|||%(authordate)|||%(objectname)" "refs/tags/*"'
 );
 
 //#endregion Setup
@@ -104,7 +109,7 @@ exec(gitCommand, (error, stdout, stderr) => {
   if (perBranch)
     tags = tags
       .flatMap(line => line.split(/, /g))
-      .filter(ref => ref.startsWith("tag:"))
+      .filter(ref => ref.startsWith("tag:") && ref.includes("|||"))
       .map(ref => ref.slice(4).trim());
   if (tags.length === 0) {
     // Exit if we could not find the referenced tag.
@@ -116,16 +121,20 @@ exec(gitCommand, (error, stdout, stderr) => {
     // Set the fallback value if no tags were found for the branch or in the repo.
     console.log(FormatWarning, `Unable to find any tags, using fallback value "${FallbackValue}".`);
     if (FallbackValue.startsWith(Prefix))
-      tags.push(FallbackValue);
+      tags.push(FallbackValue + "|||" + new Date().toISOString());
     else
-      tags.push(Prefix + FallbackValue);
+      tags.push(Prefix + FallbackValue + "|||" + new Date().toISOString());
   }
 
   // Check if any of the found tags match the regex,
-  for (const tag of tags) {
+  for (const value of tags) {
+    const [tag = "", dateText = "", commit = ""] = value.split("|||");
+    if (!dateText.trim() || !commit.trim())
+      continue;
+    const date = new Date(dateText.trim());
     const result = tagRegex.exec(tag);
     if (result)
-      return extractVersionFromMatch(result);
+      return extractVersionFromMatch(result, date, commit);
   }
 
   console.log(FormatError, "Unable to find a matching tag. Exiting.");
@@ -136,9 +145,11 @@ exec(gitCommand, (error, stdout, stderr) => {
  * Extract tag/version info from result, log to the console and set the outputs.
  *
  * @param {RegExpExecArray} result - Result the match stage.
+ * @param {Date} date - The timestamp when the tag was committed.
+ * @param {string} commit - The commit hash.
  * @returns {never} Will exit upon completion.
  */
-function extractVersionFromMatch(result) {
+function extractVersionFromMatch(result, date, commit) {
   // Extract info from regex result.
   const foundTag = result[0];
   const foundVersion = result.groups.build ? result.groups.version : result.groups.version + ".0";
@@ -166,11 +177,11 @@ function extractVersionFromMatch(result) {
       build = 0;
       break;
     case "build":
-      build++;
+      build = StaticBuildNumber !== null ? StaticBuildNumber : build + 1;
       suffixNumber = 0;
       break;
     case "suffix":
-      suffixNumber++;
+      suffixNumber = StaticBuildNumber !== null ? StaticBuildNumber : suffixNumber + 1;
       build = suffixNumber;
       break;
   }
@@ -219,6 +230,21 @@ function extractVersionFromMatch(result) {
   fs.appendFileSync(outFile, `version_minor=${minor}\n`);
   fs.appendFileSync(outFile, `version_patch=${patch}\n`);
   fs.appendFileSync(outFile, `version_build=${build}\n`);
+
+  // Add commit hash to output file.
+  fs.appendFileSync(outFile, `commit=${commit}\n`);
+  fs.appendFileSync(outFile, `commit_short=${commit.slice(0, 6)}\n`);
+
+  // Add commit date to output file.
+  fs.appendFileSync(outFile, `date=${date.toISOString()}\n`);
+  fs.appendFileSync(outFile, `date_year=${date.getUTCFullYear()}\n`);
+  fs.appendFileSync(outFile, `date_month=${(date.getUTCMonth() + 1).toString(10).padStart(2, "0")}\n`);
+  fs.appendFileSync(outFile, `date_day=${date.getUTCDate().toString(10).padStart(2, "0")}\n`);
+  fs.appendFileSync(outFile, `date_weekday=${Weekdays[date.getUTCDay()]}\n`);
+  fs.appendFileSync(outFile, `date_hours=${date.getUTCHours().toString(10).padStart(2, "0")}\n`);
+  fs.appendFileSync(outFile, `date_minutes=${date.getUTCMinutes().toString(10).padStart(2, "0")}\n`);
+  fs.appendFileSync(outFile, `date_seconds=${date.getUTCSeconds().toString(10).padStart(2, "0")}\n`);
+  fs.appendFileSync(outFile, `date_milliseconds=${date.getUTCMilliseconds().toString(10).padStart(3, "0").slice(0, 3)}\n`);
 
   // Exit
   process.exit(0);

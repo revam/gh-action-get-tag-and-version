@@ -51,19 +51,35 @@ All inputs are optional to set.
 
   Example: `"dev|daily|alpha"`
 
+- `buildNumber` — An optional static build number to use with auto-increment.
+  Useful if the build number is provided by the environment.
+
+  **NOTE**: Auto increment must be set to `"build"` or `"suffix"` for this to be
+  used.
+
+  Example: `42`
+
 ## Outputs
 
 - `tag` — The full tag with the prefix, version and suffix combined.
 
   Example: `"v1.2.3-dev.1"`
 
-- `prefix` — The tag prefix.
+- `tag_prefix` — The tag prefix.
 
   Example: `"v"`
 
-- `suffix` — The tag suffix.
+- `tag_suffix` — The tag suffix.
 
   Example: `"dev.1"`
+
+- `commit` — Full git commit hash for the tag.
+
+  Example: `9b268986ccb3999ff793d405253207fa267ebfe8`
+
+- `commit_short` — Short-form git commit hash for the tag.
+
+  Example: `9b26898`
 
 - `version` — The full version, with build number.
 
@@ -85,6 +101,42 @@ All inputs are optional to set.
 
   Example: `"1"`
 
+- `date` — An ISO 8601 format timestamp in UTC offset.
+
+  Example: `2020-08-22T02:50:59.000Z`
+
+- `date_year` — The year component of the date in UTC offset.
+
+  Example: `2020`
+
+- `date_month` — The month component of the date in UTC offset.
+
+  Example: `08`
+
+- `date_day` — The day component of the date in UTC offset.
+
+  Example: `22`
+
+- `date_weekday` — The day of the week of the date in UTC offset (e.g. Monday, Tuesday, etc.)
+
+  Example: `Saturday`
+
+- `date_hours` — The hour component of the time in UTC offset.
+
+  Example: `02`
+
+- `date_minutes` — The minute component of the time in UTC offset.
+
+  Example: `50`
+
+- `date_seconds` — The second component of the time in UTC offset.
+
+  Example: `59`
+
+- `date_milliseconds` — The millisecond component of the time in UTC offset.
+
+  Example: `000`
+
 ### Examples
 
 Get the release info for the currently referenced tag.
@@ -93,7 +145,7 @@ Get the release info for the currently referenced tag.
   id: release_info
   uses: revam/gh-action-get-tag-and-version@v1
   with:
-    tag: "{{ github.ref }}"
+    tag: ${{ github.ref }}
     prefix: v
     prefixRegex: "[vV]?"
 ```
