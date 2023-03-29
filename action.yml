@@ -54,6 +54,8 @@ outputs:
     description: 'Short-form git commit hash for the tag.'
   version:
     description: 'The full version, with build number.'
+  version_short:
+    description: 'The version, without the build number.'
   version_major:
     description: 'The major version number.'
   version_minor:

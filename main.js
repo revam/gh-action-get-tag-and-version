@@ -188,6 +188,7 @@ function extractVersionFromMatch(result, date, commit) {
 
   // Set the version/tag/timestamp.
   const version = `${major}.${minor}.${patch}.${build}`;
+  const versionNoBuild = `${major}.${minor}.${patch}`;
   let prefix = autoIncrement ? Prefix : result.groups.prefix;
   let suffix = autoIncrement ? (
     Suffix && autoIncrement === "suffix" ? (
@@ -226,6 +227,7 @@ function extractVersionFromMatch(result, date, commit) {
 
   // Add version to output file.
   fs.appendFileSync(outFile, `version=${version}\n`);
+  fs.appendFileSync(outFile, `version_short=${versionNoBuild}\n`);
   fs.appendFileSync(outFile, `version_major=${major}\n`);
   fs.appendFileSync(outFile, `version_minor=${minor}\n`);
   fs.appendFileSync(outFile, `version_patch=${patch}\n`);

@@ -85,6 +85,10 @@ All inputs are optional to set.
 
   Example: `"1.2.3.1"`
 
+- `version_short` — The version, without the build number.
+
+  Example: `1.2.3`
+
 - `version_major` — The major version number.
 
   Example: `"1"`
