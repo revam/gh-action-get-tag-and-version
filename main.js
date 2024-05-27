@@ -157,7 +157,7 @@ function extractVersionFromMatch(result, date, commit) {
   let minor = parseInt(result.groups.minor, 10);
   let patch = parseInt(result.groups.patch, 10);
   let build = parseInt(result.groups.build || "0", 10);
-  let suffixNumber = parseInt(result.groups.suffixNumber || "0", 10);
+  let suffixNumber = parseInt(result.groups.suffixNumber || (build > 0 ? build.toString(10) : "0"), 10);
 
   // Conditionally auto-increment values.
   switch (autoIncrement) {
