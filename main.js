@@ -33,7 +33,7 @@ let {
   // a match.
   INPUT_SUFFIXREGEX: SuffixRegex = "",
 
-  // Optional. To extract the version from a spesific tag, supply the tag here.
+  // Optional. To extract the version from a specific tag, supply the tag here.
   INPUT_TAG: ref = "",
 
   // Required. Provided by the action runner normally. We use "/dev/stderr" as a
@@ -45,7 +45,7 @@ let {
 const perBranch = process.env.INPUT_BRANCH === "true";
 
 // Optional. Static build number supplied by the environment/user.
-const StaticBuildNumber = process.env.INPUT_BUILD_NUMBER && !Number.isNaN(parseInt(process.env.INPUT_BUILD_NUMBER, 10)) ? parseInt(process.env.INPUT_BUILD_NUMBER, 10) : null;
+const StaticBuildNumber = process.env.INPUT_BUILDNUMBER && !Number.isNaN(parseInt(process.env.INPUT_BUILDNUMBER, 10)) ? parseInt(process.env.INPUT_BUILDNUMBER, 10) : null;
 
 // Optional. Auto-incement the version number (and reset the timestamp).
 let autoIncrement = process.env.INPUT_INCREMENT && process.env.INPUT_INCREMENT.toLowerCase() !== "false" ? process.env.INPUT_INCREMENT.toLowerCase() : false;
