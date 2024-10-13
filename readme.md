@@ -75,11 +75,11 @@ All inputs are optional to set.
 
 - `commit` — Full git commit hash for the tag.
 
-  Example: `9b268986ccb3999ff793d405253207fa267ebfe8`
+  Example: `"9b268986ccb3999ff793d405253207fa267ebfe8"`
 
 - `commit_short` — Short-form git commit hash for the tag.
 
-  Example: `9b26898`
+  Example: `"9b26898"`
 
 - `version` — The full version, with build number.
 
@@ -87,7 +87,7 @@ All inputs are optional to set.
 
 - `version_short` — The version, without the build number.
 
-  Example: `1.2.3`
+  Example: `"1.2.3"`
 
 - `version_major` — The major version number.
 
@@ -107,39 +107,39 @@ All inputs are optional to set.
 
 - `date` — An ISO 8601 format timestamp in UTC offset.
 
-  Example: `2020-08-22T02:50:59.000Z`
+  Example: `"2020-08-22T02:50:59.000Z"`
 
 - `date_year` — The year component of the date in UTC offset.
 
-  Example: `2020`
+  Example: `"2020"`
 
 - `date_month` — The month component of the date in UTC offset.
 
-  Example: `08`
+  Example: `"08"`
 
 - `date_day` — The day component of the date in UTC offset.
 
-  Example: `22`
+  Example: `"22"`
 
 - `date_weekday` — The day of the week of the date in UTC offset (e.g. Monday, Tuesday, etc.)
 
-  Example: `Saturday`
+  Example: `"Saturday"`
 
 - `date_hours` — The hour component of the time in UTC offset.
 
-  Example: `02`
+  Example: `"02"`
 
 - `date_minutes` — The minute component of the time in UTC offset.
 
-  Example: `50`
+  Example: `"50"`
 
 - `date_seconds` — The second component of the time in UTC offset.
 
-  Example: `59`
+  Example: `"59"`
 
 - `date_milliseconds` — The millisecond component of the time in UTC offset.
 
-  Example: `000`
+  Example: `"000"`
 
 ### Examples
 
