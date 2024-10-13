@@ -128,9 +128,14 @@ exec(gitCommand, (error, stdout, stderr) => {
   // Additional parsing for ref-parse
   if (perBranch)
     tags = tags
-      .flatMap(line => line.split(/, /g))
-      .filter(ref => ref.startsWith("tag:") && ref.includes("|||"))
-      .map(ref => ref.slice(4).trim());
+      .filter(ref => ref.includes("tag:") && ref.includes("|||"))
+      .flatMap(ref => {
+        const [heads, ...rest] = ref.split("|||");
+        return heads.split(",")
+          .map(head => head.trim())
+          .filter(tag => tag.startsWith("tag:"))
+          .map(tag => `${tag.slice(4).trim()}|||${rest.join("|||")}`);
+      });
   if (tags.length === 0) {
     // Exit if we could not find the referenced tag.
     if (ref) {
