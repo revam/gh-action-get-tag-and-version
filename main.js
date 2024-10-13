@@ -4,6 +4,26 @@ const { exec } = require("child_process");
 const fs = require("fs");
 
 //#endregion Imports
+//#region Type Definitions
+
+/**
+ * Version match object.
+ *
+ * @typedef {object} VersionMatch
+ * @property {string} tag - The full tag.
+ * @property {string} version - The full version, with build and/or suffix number.
+ * @property {string} suffix - The tag suffix.
+ * @property {string} prefix - The tag prefix.
+ * @property {number} major - The major version number.
+ * @property {number} minor - The minor version number.
+ * @property {number} patch - The patch version number.
+ * @property {number} build - The build version number, if any.
+ * @property {number} suffixNumber - The suffix number, if any.
+ * @property {string} commit - The commit hash.
+ * @property {Date} date - The timestamp when the tag was committed.
+ */
+
+//#endregion Type Definitions
 //#region Setup
 
 // Text coloring for the terminal.
@@ -126,6 +146,11 @@ exec(gitCommand, (error, stdout, stderr) => {
       tags.push(Prefix + FallbackValue + "|||" + new Date().toISOString());
   }
 
+  /**
+   * @type {VersionMatch[]}
+   */
+  const foundVersions = [];
+
   // Check if any of the found tags match the regex,
   for (const value of tags) {
     const [tag = "", dateText = "", commit = ""] = value.split("|||");
@@ -134,30 +159,106 @@ exec(gitCommand, (error, stdout, stderr) => {
     const date = new Date(dateText.trim());
     const result = tagRegex.exec(tag);
     if (result)
-      return extractVersionFromMatch(result, date, commit);
+      foundVersions.push(extractVersionFromMatch(result, date, commit));
   }
 
-  console.log(FormatError, "Unable to find a matching tag. Exiting.");
-  process.exit(1);
+  if (foundVersions.length === 0) {
+    console.log(FormatError, "Unable to find a matching tag. Exiting.");
+    process.exit(1);
+  }
+
+  console.log(FormatSuccess, `Found ${foundVersions.length} available versions.`);
+  const highestVersion = foundVersions.reduce((current, next) => {
+    // If current is higher, then keep it, else if next is higher, then switch, else goto next block.
+    if (current.major > next.major)
+      return current;
+    if (current.major < next.major)
+      return next;
+
+    // same as above.
+    if (current.minor > next.minor)
+      return current;
+    if (current.minor < next.minor)
+      return next;
+
+    // same as above.
+    if (current.patch > next.patch)
+      return current;
+    if (current.patch < next.patch)
+      return next;
+
+    // same as above.
+    if (current.build > next.build)
+      return current;
+    if (current.build < next.build)
+      return next;
+
+    // same as above.
+    if (current.suffixNumber > next.suffixNumber)
+      return current;
+    if (current.suffixNumber < next.suffixNumber)
+      return next;
+
+    // both are equal, so keep current.
+    return current;
+  }, foundVersions[0]);
+
+  printVersionMatch(highestVersion);
 });
 
 /**
- * Extract tag/version info from result, log to the console and set the outputs.
+ * Extract tag/version info from result.
  *
  * @param {RegExpExecArray} result - Result the match stage.
  * @param {Date} date - The timestamp when the tag was committed.
  * @param {string} commit - The commit hash.
- * @returns {never} Will exit upon completion.
+ * @returns {VersionMatch}
  */
 function extractVersionFromMatch(result, date, commit) {
   // Extract info from regex result.
   const foundTag = result[0];
-  const foundVersion = result.groups.build ? result.groups.version : result.groups.version + ".0";
+  const foundVersion = result.groups.build ? result.groups.version : result.groups.suffixNumber ? result.groups.version + "." + result.groups.suffixNumber : result.groups.version + ".0";
   let major = parseInt(result.groups.major, 10);
   let minor = parseInt(result.groups.minor, 10);
   let patch = parseInt(result.groups.patch, 10);
   let build = parseInt(result.groups.build || "0", 10);
   let suffixNumber = parseInt(result.groups.suffixNumber || (build > 0 ? build.toString(10) : "0"), 10);
+  return {
+    version: foundVersion,
+    major,
+    minor,
+    patch,
+    build,
+    prefix: result.groups.prefix,
+    suffix: result.groups.suffix,
+    suffixNumber,
+    commit,
+    date,
+    tag: foundTag,
+  };
+}
+
+/**
+ * Log to the console and set the outputs.
+ *
+ * @param {VersionMatch} versionMatch - Result from the match stage.
+ * @returns {never} Will exit upon completion.
+ */
+function printVersionMatch(versionMatch) {
+  // Extract info from regex result.
+  let {
+    version: foundVersion,
+    major,
+    minor,
+    patch,
+    build,
+    suffixNumber,
+    commit,
+    date,
+    tag: foundTag,
+    prefix: foundPrefix,
+    suffix: foundSuffix,
+  } = versionMatch;
 
   // Conditionally auto-increment values.
   switch (autoIncrement) {
@@ -189,7 +290,7 @@ function extractVersionFromMatch(result, date, commit) {
   // Set the version/tag/timestamp.
   const version = `${major}.${minor}.${patch}.${build}`;
   const versionNoBuild = `${major}.${minor}.${patch}`;
-  let prefix = autoIncrement ? Prefix : result.groups.prefix;
+  let prefix = autoIncrement ? Prefix : foundPrefix;
   let suffix = autoIncrement ? (
     Suffix && autoIncrement === "suffix" ? (
       Suffix + "." + suffixNumber
@@ -197,10 +298,10 @@ function extractVersionFromMatch(result, date, commit) {
       Suffix
     )
   ) : (
-    result.groups.suffix && result.groups.suffixNumber ? (
-      result.groups.suffix + "." + result.groups.suffixNumber
+    foundSuffix && result.groups.suffixNumber ? (
+      foundSuffix + "." + result.groups.suffixNumber
     ) : (
-      result.groups.suffix || ""
+      foundSuffix || ""
     )
   );
   let tag = foundTag;
