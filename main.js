@@ -19,6 +19,7 @@ const fs = require("fs");
  * @property {number} patch - The patch version number.
  * @property {number} build - The build version number, if any.
  * @property {number} suffixNumber - The suffix number, if any.
+ * @property {string} [rawSuffixNumber] - The raw suffix number, if any.
  * @property {string} commit - The commit hash.
  * @property {Date} date - The timestamp when the tag was committed.
  */
@@ -237,6 +238,7 @@ function extractVersionFromMatch(result, date, commit) {
     prefix: result.groups.prefix,
     suffix: result.groups.suffix,
     suffixNumber,
+    rawSuffixNumber: result.groups.suffixNumber,
     commit,
     date,
     tag: foundTag,
@@ -303,8 +305,8 @@ function printVersionMatch(versionMatch) {
       Suffix
     )
   ) : (
-    foundSuffix && result.groups.suffixNumber ? (
-      foundSuffix + "." + result.groups.suffixNumber
+    foundSuffix && versionMatch.rawSuffixNumber ? (
+      foundSuffix + "." + versionMatch.rawSuffixNumber
     ) : (
       foundSuffix || ""
     )
