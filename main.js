@@ -99,16 +99,16 @@ const tagRegex = Suffix || SuffixRegex ? (
 const gitCommand = ref ? (
   // Get the tag and version info for the selected tag.
   ref.startsWith("refs") ? (
-    `git for-each-ref --sort=-authordate --format="%(refname:short)|||%(authordate)|||%(objectname)" ${ref}`
+    `git for-each-ref --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(objectname)" ${ref}`
   ) : (
-    `git tag --sort=-authordate --format="%(refname:short)|||%(authordate)|||%(objectname)" --list ${ref}`
+    `git tag --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(objectname)" --list ${ref}`
   )
 ) : perBranch ? (
   // Get the tags reachable from the current HEAD.
   'git rev-list --no-commit-header --pretty="%D|||%aI|||%H" HEAD'
 ) : (
   // Get all the tags in the repository.
-  'git for-each-ref --sort=-authordate --format="%(refname:short)|||%(authordate)|||%(objectname)" "refs/tags/*"'
+  'git for-each-ref --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(objectname)" "refs/tags/*"'
 );
 
 //#endregion Setup
