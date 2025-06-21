@@ -7,24 +7,45 @@ A simple action to get the current/next tag and version to use in other actions.
 
 All inputs are optional to set.
 
-- `fallback` — Fallback tag/version to use when no previous tag can be found.
-  May include a valid prefix, but may also exclude it.
+- `static_version` — A static version to use. This will skip the searching stage
+  altogether and use the provided version with the current commit details.
 
-  Default: `"0.0.0"`
+  Examples: `"1"`, `"1.1"`, `"1.0.1"`, `"1.0.0.1"`, `"1-dev.1"`, `"1.0-dev.1"`,
+  `"1.0.0-dev.1"`
 
-- `increment` — Increment the version number by one digit.
+- `static_build_number` — A static build number to use with `increment_by`
+  option set to `"build"` or `"suffix"`. Useful if the build number is provided
+  by the environment, e.g. GitHub Actions, etc.
+
+  Example: `42`
+
+- `increment_by` — Increment the version number and use the current commit
+  details for output date and commit sha. This option will do nothing if
+  `static_version` is also set.
 
   Possible values are `"major"`, `"minor"`, `"patch"`, `"build"`, `"suffix"` and
   `"false"`.
 
   Default: `"false"`
 
-- `tag` — Tag to use. Will omit the searching stage and use the supplied tag ref
-  if its a valid match.
+- `incremental_tag_format` - Tag format to use when incrementing the version
+  using the `increment_by` option.
 
-  Example: `"v1.0.0"`
+  Possible values are `"full"` or `"short"`. Any other values will be considered
+  as the option being set to it's default value.
 
-- `branch` — Only search for for tags on the currently selected branch.
+  Default: `"full"`
+
+- `use_tag_ref` — Use a specific tag ref, and omit the searching stage. Will
+  throw an error if the tag ref is not found. This option will do nothing if
+  `static_version` is also set.
+
+  Default: `""`
+
+  Examples: `"v1.0.0"`, `"v1.0.0-dev.1"`
+
+- `use_branch_history` — Only search for for tags reachable from the current
+  HEAD's history. This option will do nothing if `static_version` is also set.
 
   Possible values are `"true"` or `"false"`. Any other values will be considered
   as the option not being set.
@@ -32,38 +53,62 @@ All inputs are optional to set.
   Default: `"false"`
 
 - `prefix` — The prefix to search for, and will be set for the new tags if
-  auto-increment is enabled.
+  `increment_by` is used.
 
   Default: `"v"`
 
-- `prefixRegex` — A regex sub-pattern to match multiple prefixes while looking
+  Example: `""`, `"v"`, `"project-name-"`
+
+- `prefix_regex` — A regex sub-pattern to match multiple prefixes while looking
   for a match. Must also match the given prefix.
 
-  Example: `"[vV]?"`
+  Default: `""`
+
+  Example: `"[vV]?"`, `"project-name-[vV]?|oldProjectName-[vV]?"`
 
 - `suffix` — An optional suffix to search for, and will be set for new tags if
-  auto-increment is enabled.
+  `increment_by` is used. Excluding this will omit looking for suffixes.
+
+  Default: `""`
 
   Example: `"dev"`
 
-- `suffixRegex` — A regex sub-pattern to match multiple suffixes while looking
+- `suffix_regex` — A regex sub-pattern to match multiple suffixes while looking
   for a match. Must also match the given suffix.
+
+  Default: `""`
 
   Example: `"dev|daily|alpha"`
 
-- `buildNumber` — An optional static build number to use with auto-increment.
-  Useful if the build number is provided by the environment.
+- `fallback_version` — Fallback tag/version to use when no previous tag can be
+  found. May include a valid prefix, but may also exclude it. This option will
+  do nothing if `static_version` is also set.
 
-  **NOTE**: Auto increment must be set to `"build"` or `"suffix"` for this to be
-  used.
+  Default: `"0.0.0"`
 
-  Example: `42`
+  Examples: `"v1"`, `"1.0.0"`
 
 ## Outputs
 
-- `tag` — The full tag with the prefix, version and suffix combined.
+- `tag` — The found tag with the prefix, version and suffix combined. If
+  the `increment_by` option is used then this will match the `tag_full` output
+  if `incremental_tag_format` option is set to `"full"`, otherwise it will match
+  the `tag_short` output.
+
+  Example: `"v1"`, `"v1.2.3-dev.1"`
+
+- `tag_full` — The full tag with the prefix, version and suffix combined.
 
   Example: `"v1.2.3-dev.1"`
+
+- `tag_short` — The short-form tag with the prefix, version and suffix combined.
+  The difference between this and `tag_full` is that this will collapse any `0`
+  values in thew tag name, so `v1.0.0` will be converted to `v1`, `v1.2.0` will
+  be converted to `v1.2`, and so forth. Suffix numbers are always included if
+  a suffix is set.
+
+  Examples: `"v1"`, `"v1-dev.1"`, `"v1.2"`, `"v1.2-dev.1"`, `"v1.2.3"`,
+  `"v1.2.3-dev.1"`
 
 - `tag_prefix` — The tag prefix.
 
@@ -73,11 +118,11 @@ All inputs are optional to set.
 
   Example: `"dev.1"`
 
-- `commit` — Full git commit hash for the tag.
+- `commit` — Full git commit hash for the selected commit details.
 
   Example: `"9b268986ccb3999ff793d405253207fa267ebfe8"`
 
-- `commit_short` — Short-form git commit hash for the tag.
+- `commit_short` — Short-form git commit hash for the selected commit details.
 
   Example: `"9b26898"`
 
@@ -121,7 +166,8 @@ All inputs are optional to set.
 
   Example: `"22"`
 
-- `date_weekday` — The day of the week of the date in UTC offset (e.g. Monday, Tuesday, etc.)
+- `date_weekday` — The day of the week of the date in UTC offset (e.g. Monday,
+  Tuesday, etc.)
 
   Example: `"Saturday"`
 
@@ -147,25 +193,35 @@ Get the release info for the currently referenced tag.
 ```yml
 - name: Get release info
   id: release_info
-  uses: revam/gh-action-get-tag-and-version@v1
+  uses: revam/gh-action-get-tag-and-version@v2
   with:
-    tag: ${{ github.ref }}
+    use_tag_ref: ${{ github.ref }}
     prefix: v
-    prefixRegex: "[vV]?"
+    prefix_regex: "[vV]?"
 ```
 
-Create the release info for the next dev release based on the tags reachable
-from the selected branch.
+Create a new release info for the current commit at the specified version.
+```yml
+- name: Create release info
+  id: release_info
+  uses: revam/gh-action-get-tag-and-version@v2
+  with:
+    static_version: "${{ github.event.inputs.version }}"
+    prefix: v
+```
+
+Create a new release info for the next dev release based on the tags reachable
+from the selected branch's history.
 ```yml
 - name: Create next release info
   id: release_info
-  uses: revam/gh-action-get-tag-and-version@v1
+  uses: revam/gh-action-get-tag-and-version@v2
   with:
-    branch: true
+    use_branch_history: true
     prefix: v
-    prefixRegex: "[vV]?"
+    prefix_regex: "[vV]?"
     suffix: dev
-    increment: suffix
+    increment_by: suffix
 ```
 
 Create the release info for the next release in a manually action, looking for
@@ -174,12 +230,12 @@ manually set suffix) when looking for the previous version.
 ```yml
   - name: Create next release info
     id: release_info
-    uses: revam/gh-action-get-tag-and-version@v1
+    uses: revam/gh-action-get-tag-and-version@v2
     with:
-      branch: true
+      use_branch_history: true
       prefix: v
-      prefixRegex: "[vV]?"
-      suffix: ${{ github.event.inputs.release }}
-      suffixRegex: "dev|${{ github.event.inputs.release }}"
+      prefix_regex: "[vV]?"
+      suffix: "${{ github.event.inputs.release }}"
+      suffix_regex: "dev|${{ github.event.inputs.release }}"
       increment: suffix
 ```

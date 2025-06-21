@@ -4,54 +4,66 @@ branding:
   icon: 'tag'
   color: 'gray-dark'
 inputs:
-  fallback:
-    description: Optional. Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it.
-    required: false
-    default: "0.0.0"
-  increment:
-    description: Optional. Increment the version number by one digit. Possible values are "major", "minor", "patch", "build" and "suffix".
-    required: false
-    default: "false"
-  tag:
-    description: Optional. Tag ref to use. Will omit the searching stage and use the supplied tag ref if its a valid match.
+  static_version:
+    description: Optional. A static version to use. This will skip the searching stage altogether and use the provided version with the current commit details.
     required: false
     default: ""
-  branch:
-    description: Optional. Only search for for tags on the currently selected branch.
+  static_build_number:
+    description: 'Optional.  A static build number to use with increment_by option set to "build" or "suffix". Useful if the build number is provided by the environment, e.g. GitHub Actions, etc.'
+    required: false
+    default: ""
+  increment_by:
+    description: Optional. Increment the version number and use the current commit details for output date and commit sha. This option will do nothing if static_version is also set. Possible values are "major", "minor", "patch", "build", "suffix" and "false".
+    required: false
+    default: "false"
+  incremental_tag_format:
+    description: Optional. Tag format to use when incrementing the version using the increment_by option. Possible values are "full" or "short".
+    required: false
+    default: "full"
+  use_tag_ref:
+    description: Optional. Use a specific tag ref, and omit the searching stage. Will throw an error if the tag ref is not found. This option will do nothing if static_version is also set.
+    required: false
+    default: ""
+  use_branch_history:
+    description: Optional. Only search for for tags reachable from the current HEAD's history. This option will do nothing if static_version is also set.
     required: false
     default: "false"
   prefix:
-    description: Optional. The prefix to search for, and will be set for the new tags if auto-increment is enabled.
+    description: Optional. The prefix to search for, and will be set for the new tags if increment_by is used.
     required: false
     default: "v"
-  prefixRegex:
+  prefix_regex:
     description: Optional. A regex sub-pattern to match multiple prefixes while looking for a match. Must also match the given prefix.
     required: false
     default: ""
   suffix:
-    description: Optional. An optional suffix to search for, and will be set for new tags if auto-increment is enabled.
+    description: Optional. An optional suffix to search for, and will be set for new tags if increment_by is used. Excluding this will omit looking for suffixes.
     required: false
     default: ""
-  suffixRegex:
+  suffix_regex:
     description: Optional. A regex sub-pattern to match multiple suffixes while looking for a match. Must also match the given suffix.
     required: false
     default: ""
-  buildNumber:
-    description: 'Optional. A static build number.  Useful if the build number is provided by the environment. NOTE: Auto increment must be set to "build" or "suffix".'
+  fallback_version:
+    description: Optional. Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it. This option will do nothing if static_version is also set.
     required: false
-    default: ""
+    default: "0.0.0"
 
 outputs:
   tag:
+    description: 'Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it. This option will do nothing if static_version is also set.'
+  tag_full:
     description: 'The full tag with the prefix, version and suffix combined.'
+  tag_short:
+    description: 'The short-form tag with the prefix, version and suffix combined. The difference between this and tag_full is that this will collapse any 0 values in thew tag name, so v1.0.0 will be converted to v1, v1.2.0 will be converted to v1.2, and so forth. Suffix numbers are always included if a suffix is set.'
   tag_prefix:
     description: 'The tag prefix.'
   tag_suffix:
     description: 'The tag suffix.'
   commit:
-    description: 'Full git commit hash for the tag.'
+    description: 'Full git commit hash for the selected commit details.'
   commit_short:
-    description: 'Short-form git commit hash for the tag.'
+    description: 'Short-form git commit hash for the selected commit details.'
   version:
     description: 'The full version, with build number.'
   version_short:
