@@ -17,12 +17,12 @@ jobs:
 
       - name: Get next version
         id: release_info
-        uses: revam/gh-action-get-tag-and-version@v1
+        uses: revam/gh-action-get-tag-and-version@v2
         with:
           prefix: v
-          prefixRegex: "[vV]?"
+          prefix_regex: "[vV]?"
           suffix: dev
-          increment: suffix
+          increment_by: suffix
 
       - name: Test print tag and version
         shell: sh
