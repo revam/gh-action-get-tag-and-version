@@ -345,6 +345,13 @@ exec(BaseCommand, (error, stdout, stderr) => {
     if (current.suffixNumber < next.suffixNumber)
       return next;
 
+    // if all above are equal, then check the tag length. longer tag usually
+    // means it is more accurate.
+    if (current.tag.length > next.tag.length)
+      return current;
+    if (current.tag.length < next.tag.length)
+      return next;
+
     // both are equal, so keep current.
     return current;
   }, foundVersions[0]);
