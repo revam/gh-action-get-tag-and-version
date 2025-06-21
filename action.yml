@@ -96,5 +96,5 @@ outputs:
     description: 'The millisecond component of the time in UTC offset.'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'main.js'
