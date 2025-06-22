@@ -213,13 +213,13 @@ if (IncrementBy && !AutoIncrementSet.has(IncrementBy)) {
 }
 
 // Make sure we have a valid regex for our prefix if it's set.
-if (PrefixRegex && !(new RegExp(`^${PrefixRegex}$`).test(Prefix))) {
+if (Prefix && PrefixRegex && !(new RegExp(`^${PrefixRegex}$`).test(Prefix))) {
   console.log(FormatError, 'Input "prefixRegex" must match input "prefix" if set. Exiting.');
   process.exit(1);
 }
 
 // Make sure we have a valid regex for our suffix if it's set.
-if (SuffixRegex && !(new RegExp(`^${SuffixRegex}$`).test(Suffix))) {
+if (Suffix && SuffixRegex && !(new RegExp(`^${SuffixRegex}$`).test(Suffix))) {
   console.log(FormatError, 'Input "suffixRegex" must match input "suffix" if set. Exiting.');
   process.exit(1);
 }
