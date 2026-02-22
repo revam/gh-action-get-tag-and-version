@@ -4,10 +4,6 @@ branding:
   icon: 'tag'
   color: 'gray-dark'
 inputs:
-  static_version:
-    description: Optional. A static version to use. This will skip the searching stage altogether and use the provided version with the current commit details.
-    required: false
-    default: ""
   static_build_number:
     description: 'Optional.  A static build number to use with increment_by option set to "build" or "suffix". Useful if the build number is provided by the environment, e.g. GitHub Actions, etc.'
     required: false
@@ -20,6 +16,10 @@ inputs:
     description: Optional. Tag format to use when incrementing the version using the increment_by option. Possible values are "full" or "short".
     required: false
     default: "full"
+  use_version:
+    description: Optional. A version to use. This will skip the searching stage altogether and use the provided version with the current commit details.
+    required: false
+    default: ""
   use_tag_ref:
     description: Optional. Use a specific tag ref, and omit the searching stage. Will throw an error if the tag ref is not found. This option will do nothing if static_version is also set.
     required: false

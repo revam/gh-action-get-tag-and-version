@@ -7,12 +7,6 @@ A simple action to get the current/next tag and version to use in other actions.
 
 All inputs are optional to set.
 
-- `static_version` — A static version to use. This will skip the searching stage
-  altogether and use the provided version with the current commit details.
-
-  Examples: `"1"`, `"1.1"`, `"1.0.1"`, `"1.0.0.1"`, `"1-dev.1"`, `"1.0-dev.1"`,
-  `"1.0.0-dev.1"`
-
 - `static_build_number` — A static build number to use with `increment_by`
   option set to `"build"` or `"suffix"`. Useful if the build number is provided
   by the environment, e.g. GitHub Actions, etc.
@@ -37,6 +31,12 @@ All inputs are optional to set.
   as the option being set to it's default value.
 
   Default: `"full"`
+
+- `use_version` — A version to use. This will skip the searching stage
+  altogether and use the provided version with the current commit details.
+
+  Examples: `"1"`, `"1.1"`, `"1.0.1"`, `"1.0.0.1"`, `"1-dev.1"`, `"1.0-dev.1"`,
+  `"1.0.0-dev.1"`
 
 - `use_tag_ref` — Use a specific tag ref, and omit the searching stage. Will
   throw an error if the tag ref is not found. This option will do nothing if

@@ -51,14 +51,14 @@ const Weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 const OutputFile = process.env.GITHUB_OUTPUT || "/dev/stderr";
 
 /**
- * A static version to use. This will skip the searching stage altogether and
- * use the provided version with the current commit details.
+ * A version to use. This will skip the searching stage altogether and use the
+ * provided version with the current commit details.
  *
  * @type {string}
  *
  * @default ""
  */
-const StaticVersion = process.env.INPUT_STATIC_VERSION || "";
+const UseVersion = process.env.INPUT_USE_VERSION || "";
 
 /**
  * A static build number to use with `increment_by` option set to `"build"` or
@@ -69,7 +69,7 @@ const StaticVersion = process.env.INPUT_STATIC_VERSION || "";
  *
  * @default null
  */
-const StaticBuildNumber = !StaticVersion && process.env.INPUT_STATIC_BUILD_NUMBER && !Number.isNaN(parseInt(process.env.INPUT_STATIC_BUILD_NUMBER, 10)) ? parseInt(process.env.INPUT_STATIC_BUILD_NUMBER, 10) : null;
+const StaticBuildNumber = process.env.INPUT_STATIC_BUILD_NUMBER && !Number.isNaN(parseInt(process.env.INPUT_STATIC_BUILD_NUMBER, 10)) ? parseInt(process.env.INPUT_STATIC_BUILD_NUMBER, 10) : null;
 
 /**
  * Increment the version number and use the current commit details for output
@@ -81,7 +81,7 @@ const StaticBuildNumber = !StaticVersion && process.env.INPUT_STATIC_BUILD_NUMBE
  * @default false
  */
 const IncrementBy = (() => {
-  if (StaticVersion || !process.env.INPUT_INCREMENT_BY)
+  if (!process.env.INPUT_INCREMENT_BY)
     return false;
   const values = new Set(
     process.env.INPUT_INCREMENT_BY.split(",")
@@ -112,7 +112,7 @@ const IncrementalTagFormat = process.env.INPUT_INCREMENTAL_TAG_FORMAT === "short
  *
  * @default ""
  */
-const UseTagRef = process.env.INPUT_USE_TAG_REF || "";
+const UseTagRef = !UseVersion && process.env.INPUT_USE_TAG_REF || "";
 
 /**
  * Only search for for tags reachable from the current HEAD's history. This
@@ -122,7 +122,7 @@ const UseTagRef = process.env.INPUT_USE_TAG_REF || "";
  *
  * @default false
  */
-const UseBranchHistory = !StaticVersion && process.env.INPUT_USE_BRANCH_HISTORY === "true";
+const UseBranchHistory = !UseVersion && process.env.INPUT_USE_BRANCH_HISTORY === "true";
 
 /**
  * Use semantic versioning when comparing versions. So e.g. `1.0.0` will be
@@ -219,7 +219,7 @@ const VersionRegex = Suffix || SuffixRegex ? (
 const CurrentCommitCommand = `git rev-list --no-commit-header --pretty="%aI||||||%H" -n 1 HEAD`;
 
 // Command to run.
-const BaseCommand = StaticVersion ? (
+const BaseCommand = UseVersion ? (
   // Get the latest commit details we need for the static version.
   CurrentCommitCommand
 ) : UseTagRef ? (
@@ -246,25 +246,25 @@ if (IncrementBy && !Array.from(IncrementBy).every(value => AutoIncrementSet.has(
 
 // Make sure we have a valid regex for our prefix if it's set.
 if (Prefix && PrefixRegex && !(new RegExp(`^${PrefixRegex}$`).test(Prefix))) {
-  console.log(FormatError, 'Input "prefixRegex" must match input "prefix" if set. Exiting.');
+  console.log(FormatError, 'Input "prefix_regex" must match input "prefix" if set. Exiting.');
   process.exit(1);
 }
 
 // Make sure we have a valid regex for our suffix if it's set.
 if (Suffix && SuffixRegex && !(new RegExp(`^${SuffixRegex}$`).test(Suffix))) {
-  console.log(FormatError, 'Input "suffixRegex" must match input "suffix" if set. Exiting.');
+  console.log(FormatError, 'Input "suffix_regex" must match input "suffix" if set. Exiting.');
   process.exit(1);
 }
 
 // Make sure we have a valid fallback value.
 if (!VersionRegex.test(FallbackValue)) {
-  console.log(FormatError, `Invalid value "${FallbackValue}" supplied to input "fallback". Must match regex "${VersionRegex.source}"`);
+  console.log(FormatError, `Invalid value "${FallbackValue}" supplied to input "fallback_version". Must match regex "${VersionRegex.source}"`);
   process.exit(1);
 }
 
 // Make sure we have a valid static version value.
-if (StaticVersion && !VersionRegex.test(StaticVersion)) {
-  console.log(FormatError, `Invalid value "${StaticVersion}" supplied to input "version". Must match regex "${VersionRegex.source}"`);
+if (UseVersion && !VersionRegex.test(UseVersion)) {
+  console.log(FormatError, `Invalid value "${UseVersion}" supplied to input "use_version". Must match regex "${VersionRegex.source}"`);
   process.exit(1);
 }
 
@@ -278,12 +278,12 @@ exec(BaseCommand, (error, stdout, stderr) => {
     process.exit(error.code || error.signal || 1);
   }
 
-  if (StaticVersion) {
-    if (StaticVersion.startsWith(Prefix)) {
-      stdout = StaticVersion + "|||" + stdout;
+  if (UseVersion) {
+    if (UseVersion.startsWith(Prefix)) {
+      stdout = UseVersion + "|||" + stdout;
     }
     else {
-      stdout = Prefix + StaticVersion + "|||" + stdout;
+      stdout = Prefix + UseVersion + "|||" + stdout;
     }
   }
 
@@ -344,7 +344,7 @@ exec(BaseCommand, (error, stdout, stderr) => {
     process.exit(1);
   }
 
-  if (StaticVersion) {
+  if (UseVersion) {
     console.log(FormatSuccess, `Using provided version.`);
   }
   else {
