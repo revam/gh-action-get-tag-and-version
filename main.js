@@ -433,6 +433,7 @@ function extractVersionFromMatch(result, date, commit) {
   const patch = parseInt(result.groups.patch || "0", 10);
   const build = parseInt(result.groups.build || "0", 10);
   const suffixNumber = parseInt(result.groups.suffixNumber || (build > 0 ? build.toString(10) : "0"), 10);
+  const suffix = result.groups.suffixNumber ? result.groups.suffix.slice(0, -(1 + result.groups.suffixNumber.length)) : "";
   return {
     version: `${major}.${minor}.${patch}${build > 0 ? `.${build}` : suffixNumber > 0 ? `.${suffixNumber}` : ".0"}`,
     major,
@@ -440,7 +441,7 @@ function extractVersionFromMatch(result, date, commit) {
     patch,
     build,
     prefix: result.groups.prefix,
-    suffix: result.groups.suffix,
+    suffix,
     suffixNumber,
     rawSuffixNumber: result.groups.suffixNumber,
     commit,
