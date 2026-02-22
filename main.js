@@ -216,7 +216,7 @@ const VersionRegex = Suffix || SuffixRegex ? (
 );
 
 // Get the latest commit details.
-const CurrentCommitCommand = `git rev-list --no-commit-header --pretty="%aI|||%H" -n 1 HEAD`;
+const CurrentCommitCommand = `git rev-list --no-commit-header --pretty="%aI||||||%H" -n 1 HEAD`;
 
 // Command to run.
 const BaseCommand = StaticVersion ? (
@@ -516,7 +516,7 @@ function printVersionMatch(versionMatch) {
     // Update commit & date if auto-incrementing.
     try {
       const details = execSync(CurrentCommitCommand, { encoding: "utf-8" }).trim().split("|||");
-      commit = details[1];
+      commit = details[2];
       date = new Date(details[0]);
     }
     catch (error) {
