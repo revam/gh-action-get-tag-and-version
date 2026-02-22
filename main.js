@@ -349,10 +349,10 @@ exec(BaseCommand, (error, stdout, stderr) => {
   }
   else {
     console.log(FormatSuccess, `Found ${foundVersions.length} available versions.`);
-    if (ListFoundTags) {
-      for (const version of foundVersions.slice().reverse()) {
-        showVersionMatch(version);
-      }
+  }
+  if (ListFoundTags) {
+    for (const version of foundVersions.slice().reverse()) {
+      showVersionMatch(version);
     }
   }
   const highestVersion = foundVersions.reduce((current, next) => {
