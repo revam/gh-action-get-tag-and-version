@@ -28,6 +28,10 @@ inputs:
     description: Optional. Only search for for tags reachable from the current HEAD's history. This option will do nothing if static_version is also set.
     required: false
     default: "false"
+  use_semver:
+    description: Optional. Use semantic versioning when comparing versions. So e.g. "1.0.0" will be greater than "1.0.0-suffix.1". This option will do nothing if static_version is also set.
+    required: false
+    default: "false"
   prefix:
     description: Optional. The prefix to search for, and will be set for the new tags if increment_by is used.
     required: false

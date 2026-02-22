@@ -54,6 +54,15 @@ All inputs are optional to set.
 
   Default: `"false"`
 
+- `use_semver` — Use semantic versioning when comparing versions. So e.g.
+  `1.0.0` will be greater than `1.0.0-suffix.1`. This option will do nothing if
+  `static_version` is also set.
+
+  Possible values are `"true"` or `"false"`. Any other values will be considered
+  as the option not being set.
+
+  Default: `"false"`
+
 - `prefix` — The prefix to search for, and will be set for the new tags if
   `increment_by` is used.
 

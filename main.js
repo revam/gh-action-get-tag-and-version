@@ -125,6 +125,17 @@ const UseTagRef = process.env.INPUT_USE_TAG_REF || "";
 const UseBranchHistory = !StaticVersion && process.env.INPUT_USE_BRANCH_HISTORY === "true";
 
 /**
+ * Use semantic versioning when comparing versions. So e.g. `1.0.0` will be
+ * greater than `1.0.0-suffix.1`. This option will do nothing if static_version
+ * is also set.
+ *
+ * @type {boolean}
+ *
+ * @default false
+ */
+const UseSemVer = process.env.INPUT_USE_SEMVER === "true";
+
+/**
  * The prefix to search for, and will be set for the new tags if `increment_by`
  * is used.
  *
@@ -369,11 +380,29 @@ exec(BaseCommand, (error, stdout, stderr) => {
     if (current.build < next.build)
       return next;
 
-    // same as above.
-    if (current.suffixNumber > next.suffixNumber)
-      return current;
-    if (current.suffixNumber < next.suffixNumber)
-      return next;
+    if (UseSemVer) {
+      const currentHasSuffix = Boolean(current.suffix || current.suffixNumber > 0);
+      const nextHasSuffix = Boolean(next.suffix || next.suffixNumber > 0);
+      if (!currentHasSuffix && nextHasSuffix)
+        return current;
+      if (currentHasSuffix && !nextHasSuffix)
+        return next;
+
+      if (currentHasSuffix && nextHasSuffix) {
+        // same as above.
+        if (current.suffixNumber > next.suffixNumber)
+          return current;
+        if (current.suffixNumber < next.suffixNumber)
+          return next;
+      }
+    }
+    else {
+        // same as above.
+        if (current.suffixNumber > next.suffixNumber)
+          return current;
+        if (current.suffixNumber < next.suffixNumber)
+          return next;
+    }
 
     // if all above are equal, then check the tag length. longer tag usually
     // means it is more accurate.
