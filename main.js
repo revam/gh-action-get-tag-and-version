@@ -88,7 +88,7 @@ const IncrementBy = (() => {
       .map((value) => value.trim().toLowerCase())
       .filter((value) => value),
   );
-  if (values.length === 0 || values.has("false"))
+  if (values.size === 0 || values.has("false"))
     return false;
   return values;
 })();
@@ -320,7 +320,7 @@ exec(BaseCommand, (error, stdout, stderr) => {
   }
 
   /**
-   * @type {VersionMatch[]}
+   * @type {[VersionMatch, ...VersionMatch[]]}
    */
   const foundVersions = [];
 
@@ -545,7 +545,7 @@ function printVersionMatch(versionMatch) {
   let tag = foundTag;
   let tag_full = `${prefix}${major}.${minor}.${patch}`;
   let tag_short = `${prefix}${major}`;
-  const addBuild = build > 0 && !IncrementBy.has("suffix");
+  const addBuild = build > 0 && !(IncrementBy && IncrementBy.has("suffix"));
   if (minor > 0 || patch > 0 || addBuild) {
     tag_short += `.${minor}`;
   }
