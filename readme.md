@@ -88,6 +88,14 @@ All inputs are optional to set.
 
   Examples: `"v1"`, `"1.0.0"`
 
+- `list_found_tags` — Optional. Debug option to list out all found tags. This
+  option will do nothing if `static_version` is also set.
+
+  Possible values are `"true"` or `"false"`. Any other values will be considered
+  as the option not being set.
+
+  Default: `"false"`
+
 ## Outputs
 
 - `tag` — The found tag with the prefix, version and suffix combined. If

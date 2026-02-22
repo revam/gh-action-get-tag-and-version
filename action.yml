@@ -48,6 +48,10 @@ inputs:
     description: Optional. Fallback tag/version to use when no previous tag can be found. May include a valid prefix, but may also exclude it. This option will do nothing if static_version is also set.
     required: false
     default: "0.0.0"
+  list_found_tags:
+    description: Optional. Debug option to list out all found tags. This option will do nothing if static_version is also set.
+    required: false
+    default: "false"
 
 outputs:
   tag:

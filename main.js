@@ -29,6 +29,7 @@ const fs = require("fs");
 
 // Text coloring for the terminal.
 const FormatSuccess = "\x1b[32m%s\x1b[0m";
+const FormatInfo = "\x1b[36m%s\x1b[0m";
 const FormatWarning = "\x1b[33m%s\x1b[0m";
 const FormatError = "\x1b[31m%s\x1b[0m";
 
@@ -162,6 +163,15 @@ const SuffixRegex = process.env.INPUT_SUFFIX_REGEX || "";
  * @default "0.0.0"
  */
 const FallbackValue = process.env.INPUT_FALLBACK_VERSION || "0.0.0";
+
+/**
+ * Whether to list the tags that were found.
+ *
+ * @type {boolean}
+ *
+ * @default false
+ */
+const ListFoundTags = process.env.INPUT_LIST_FOUND_TAGS === "true";
 
 /**
  * The regex to use to match tags.
@@ -317,6 +327,11 @@ exec(BaseCommand, (error, stdout, stderr) => {
   }
   else {
     console.log(FormatSuccess, `Found ${foundVersions.length} available versions.`);
+    if (ListFoundTags) {
+      for (const version of foundVersions.slice().reverse()) {
+        showVersionMatch(version);
+      }
+    }
   }
   const highestVersion = foundVersions.reduce((current, next) => {
     // If current is higher, then keep it, else if next is higher, then switch, else goto next block.
@@ -392,6 +407,19 @@ function extractVersionFromMatch(result, date, commit) {
     date,
     tag: result[0],
   };
+}
+
+/**
+ * Show version match info.
+ *
+ * @param {VersionMatch} versionMatch - Result from the match stage.
+ */
+function showVersionMatch(versionMatch) {
+  const { tag, version, commit, date } = versionMatch;
+  console.log(FormatInfo, `Tag: ${tag}`);
+  console.log(FormatInfo, `Version: ${version}`);
+  console.log(FormatInfo, `Commit: ${commit}`);
+  console.log(FormatInfo, `Date: ${date}`);
 }
 
 /**
