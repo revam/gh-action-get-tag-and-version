@@ -76,11 +76,22 @@ const StaticBuildNumber = !StaticVersion && process.env.INPUT_STATIC_BUILD_NUMBE
  * date and commit sha. This option will do nothing if `static_version` is also
  * set.
  *
- * @type {"major" | "minor" | "patch" | "build" | "suffix" | false}
+ * @type {Set<"major" | "minor" | "patch" | "build" | "suffix"> | false}
  *
  * @default false
  */
-const IncrementBy = !StaticVersion && process.env.INPUT_INCREMENT_BY && process.env.INPUT_INCREMENT_BY.toLowerCase() !== "false" ? process.env.INPUT_INCREMENT_BY.toLowerCase() : false;
+const IncrementBy = (() => {
+  if (StaticVersion || !process.env.INPUT_INCREMENT_BY)
+    return false;
+  const values = new Set(
+    process.env.INPUT_INCREMENT_BY.split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter((value) => value),
+  );
+  if (values.length === 0 || values.has("false"))
+    return false;
+  return values;
+})();
 
 /**
  * Tag format to use when incrementing the version using the `increment_by`
@@ -217,8 +228,8 @@ const BaseCommand = StaticVersion ? (
 
 // Make sure we have a valid auto-increment value.
 const AutoIncrementSet = new Set(["major", "minor", "patch", "build", "suffix"]);
-if (IncrementBy && !AutoIncrementSet.has(IncrementBy)) {
-  console.log(FormatError, `Invalid value "${IncrementBy}" supplied to input "increment". Valid values are "${Array.from(AutoIncrementSet).join('", "')}" `);
+if (IncrementBy && !Array.from(IncrementBy).every(value => AutoIncrementSet.has(value))) {
+  console.log(FormatError, `Invalid value(s) ["${Array.from(IncrementBy).filter(value => !AutoIncrementSet.has(value)).join("\", \"")}"] supplied to input "increment_by". Valid values are "${Array.from(AutoIncrementSet).join('", "')}" `);
   process.exit(1);
 }
 
@@ -446,30 +457,31 @@ function printVersionMatch(versionMatch) {
 
   if (IncrementBy) {
     // Conditionally auto-increment values.
-    switch (IncrementBy) {
-      case "major":
-        major++;
-        minor = 0;
-        patch = 0;
-        build = 0;
-        break;
-      case "minor":
-        minor++;
-        patch = 0;
-        build = 0;
-        break;
-      case "patch":
-        patch++;
-        build = 0;
-        break;
-      case "build":
-        build = StaticBuildNumber !== null ? StaticBuildNumber : build + 1;
-        suffixNumber = 0;
-        break;
-      case "suffix":
-        suffixNumber = StaticBuildNumber !== null ? StaticBuildNumber : suffixNumber + 1;
-        build = suffixNumber;
-        break;
+    if (IncrementBy.has("major")) {
+      major++;
+      minor = 0;
+      patch = 0;
+      build = 0;
+      suffixNumber = 0;
+    }
+    if (IncrementBy.has("minor")) {
+      minor++;
+      patch = 0;
+      build = 0;
+      suffixNumber = 0;
+    }
+    if (IncrementBy.has("patch")) {
+      patch++;
+      build = 0;
+      suffixNumber = 0;
+    }
+    if (IncrementBy.has("build")) {
+      build = StaticBuildNumber !== null ? StaticBuildNumber : build + 1;
+      suffixNumber = 0;
+    }
+    if (IncrementBy.has("suffix")) {
+      suffixNumber = StaticBuildNumber !== null ? StaticBuildNumber : suffixNumber + 1;
+      build = suffixNumber;
     }
 
     // Update commit & date if auto-incrementing.
@@ -489,7 +501,7 @@ function printVersionMatch(versionMatch) {
   const versionNoBuild = `${major}.${minor}.${patch}`;
   let prefix = IncrementBy ? Prefix : foundPrefix;
   let suffix = IncrementBy ? (
-    Suffix && IncrementBy === "suffix" ? (
+    Suffix && IncrementBy.has("suffix") ? (
       Suffix + "." + suffixNumber
     ) : (
       Suffix
@@ -504,7 +516,7 @@ function printVersionMatch(versionMatch) {
   let tag = foundTag;
   let tag_full = `${prefix}${major}.${minor}.${patch}`;
   let tag_short = `${prefix}${major}`;
-  const addBuild = build > 0 && IncrementBy !== "suffix";
+  const addBuild = build > 0 && !IncrementBy.has("suffix");
   if (minor > 0 || patch > 0 || addBuild) {
     tag_short += `.${minor}`;
   }

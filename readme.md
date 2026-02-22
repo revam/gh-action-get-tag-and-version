@@ -23,8 +23,10 @@ All inputs are optional to set.
   details for output date and commit sha. This option will do nothing if
   `static_version` is also set.
 
-  Possible values are `"major"`, `"minor"`, `"patch"`, `"build"`, `"suffix"` and
-  `"false"`.
+  Possible values are any combination of `"major"`, `"minor"`, `"patch"`,
+  `"build"`, `"suffix"` and `"false"` separated by a comma. Any other values
+  will be considered as invalid, and will cause an error. If `"false"` is
+  supplied in the list, then it will be considered as the option not being set.
 
   Default: `"false"`
 
