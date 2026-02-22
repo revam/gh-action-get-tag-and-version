@@ -193,16 +193,16 @@ const BaseCommand = StaticVersion ? (
 ) : UseTagRef ? (
   // Get the tag and version info for the selected tag.
   UseTagRef.startsWith("refs") ? (
-    `git for-each-ref --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(objectname)" ${UseTagRef}`
+    `git for-each-ref --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(*creatordate)|||%(objectname)|||(*objectname)" ${UseTagRef}`
   ) : (
-    `git tag --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(objectname)" --list ${UseTagRef}`
+    `git tag --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(*creatordate)|||%(objectname)|||(*objectname)" --list ${UseTagRef}`
   )
 ) : UseBranchHistory ? (
   // Get the tags reachable from the current HEAD.
-  'git rev-list --no-commit-header --pretty="%D|||%aI|||%H" HEAD'
+  'git rev-list --no-commit-header --pretty="%D|||%aI||||||%H" HEAD'
 ) : (
   // Get all the tags in the repository.
-  'git for-each-ref --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(objectname)" "refs/tags/*"'
+  'git for-each-ref --sort=-creatordate --format="%(refname:short)|||%(creatordate)|||%(*creatordate)|||%(objectname)|||%(*objectname)" "refs/tags/*"'
 );
 
 // Make sure we have a valid auto-increment value.
@@ -294,7 +294,11 @@ exec(BaseCommand, (error, stdout, stderr) => {
 
   // Check if any of the found tags match the regex,
   for (const value of tags) {
-    const [tag = "", dateText = "", commit = ""] = value.split("|||");
+    let [tag = "", dateText = "", dateText2 = "", commit = "", commit2 = ""] = value.split("|||");
+    if (dateText2.trim())
+      dateText = dateText2.trim();
+    if (commit2.trim())
+      commit = commit2.trim();
     if (!dateText.trim() || !commit.trim())
       continue;
     const date = new Date(dateText.trim());
